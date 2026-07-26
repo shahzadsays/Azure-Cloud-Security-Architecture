@@ -23,7 +23,9 @@ Each folder below represents a standalone PoC. Click on any project to view the 
     *   *Features: Forced tunneling, Azure Firewall Premium, Deep Packet Inspection.*
 *   **[Azure ExpressRoute Provider Connectivity](./Azure%20ExpressRoute)**
     *   *Features: BGP Private Peering, ExpressRoute Gateways, Hybrid routing.*
-
+*   **[End-to-End Security Engineering]
+    *    *Features: Hub-and-spoke Azure security design, Azure firewall forced egress control,private endpoints and private DNS, managed identity-based secret retrieval.
+      
 ### 🔒 Data Protection & Isolation
 *   **[Azure SQL Private Endpoint Isolation](./Azure%20SQL%20Private%20Endpoint%20Isolation)**
     *   *Features: Data exfiltration prevention, Private DNS zones, Public access disabled.*
