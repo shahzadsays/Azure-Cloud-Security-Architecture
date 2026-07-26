@@ -4,6 +4,15 @@ A real Azure ExpressRoute lab that demonstrates provider-based private connectiv
 
 This project is designed for cloud and network engineers who want a practical, production-style ExpressRoute setup for portfolio and interview use.
 
+A structural blueprint demonstrating provider-based private connectivity between on-premises and Azure using private peering, an ExpressRoute virtual network gateway, and a workload VNet.
+
+This project is designed for cloud and network engineers who want a practical, production-style ExpressRoute architecture setup for portfolio demonstration.
+
+> ⚠️ **Lab Status & Execution Note: Service Provider Dependency**
+> This lab outlines the complete architecture and Azure-side configuration required for an ExpressRoute deployment. However, because a true ExpressRoute circuit requires physical/logical provisioning, BGP peering, and approval from an official Telecommunications/Internet Service Provider (ISP), achieving a fully "Connected" state is generally outside the scope of an independent proof-of-concept environment. 
+> 
+> This guide serves as a precise, enterprise-grade blueprint for configuring the Azure boundaries exactly up to the critical provider handoff point (Service Key generation and Azure private peering configuration).
+
 ---
 
 ## Lab Scope
