@@ -1,0 +1,76 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "privateEndpoints_pe_sql_orglab_name": {
+            "defaultValue": "pe-sql-orglab",
+            "type": "String"
+        },
+        "servers_sql_org_labserver_externalid": {
+            "defaultValue": "/subscriptions/08090c4c-f1ab-4fd3-9a9d-f4fda08b6212/resourceGroups/rg_lab/providers/Microsoft.Sql/servers/sql-org-labserver",
+            "type": "String"
+        },
+        "virtualNetworks_data_vnet_externalid": {
+            "defaultValue": "/subscriptions/08090c4c-f1ab-4fd3-9a9d-f4fda08b6212/resourceGroups/rg_lab/providers/Microsoft.Network/virtualNetworks/data-vnet",
+            "type": "String"
+        },
+        "privateDnsZones_privatelink_database_windows_net_externalid": {
+            "defaultValue": "/subscriptions/08090c4c-f1ab-4fd3-9a9d-f4fda08b6212/resourceGroups/rg_lab/providers/Microsoft.Network/privateDnsZones/privatelink.database.windows.net",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2025-05-01",
+            "name": "[parameters('privateEndpoints_pe_sql_orglab_name')]",
+            "location": "centralus",
+            "properties": {
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "[parameters('privateEndpoints_pe_sql_orglab_name')]",
+                        "id": "[concat(resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pe_sql_orglab_name')), concat('/privateLinkServiceConnections/', parameters('privateEndpoints_pe_sql_orglab_name')))]",
+                        "properties": {
+                            "privateLinkServiceId": "[parameters('servers_sql_org_labserver_externalid')]",
+                            "groupIds": [
+                                "sqlServer"
+                            ],
+                            "privateLinkServiceConnectionState": {
+                                "status": "Approved",
+                                "description": "Auto-approved",
+                                "actionsRequired": "None"
+                            }
+                        }
+                    }
+                ],
+                "manualPrivateLinkServiceConnections": [],
+                "customNetworkInterfaceName": "[concat(parameters('privateEndpoints_pe_sql_orglab_name'), '-nic')]",
+                "subnet": {
+                    "id": "[concat(parameters('virtualNetworks_data_vnet_externalid'), '/subnets/data-subnet')]"
+                },
+                "ipConfigurations": [],
+                "customDnsConfigs": [],
+                "ipVersionType": "IPv4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2025-05-01",
+            "name": "[concat(parameters('privateEndpoints_pe_sql_orglab_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoints_pe_sql_orglab_name'))]"
+            ],
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "privatelink-database-windows-net",
+                        "properties": {
+                            "privateDnsZoneId": "[parameters('privateDnsZones_privatelink_database_windows_net_externalid')]"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,64 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "networkSecurityGroups_data_nsg_name": {
+            "defaultValue": "data-nsg",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2025-05-01",
+            "name": "[parameters('networkSecurityGroups_data_nsg_name')]",
+            "location": "centralus",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "allow-sql-traffic",
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups/securityRules', parameters('networkSecurityGroups_data_nsg_name'), 'allow-sql-traffic')]",
+                        "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "1433",
+                            "sourceAddressPrefix": "10.0.0.0/16",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 111,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2025-05-01",
+            "name": "[concat(parameters('networkSecurityGroups_data_nsg_name'), '/allow-sql-traffic')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_data_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "1433",
+                "sourceAddressPrefix": "10.0.0.0/16",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 111,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        }
+    ]
+}
