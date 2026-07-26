@@ -1,0 +1,213 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "applicationGateways_app_gateway_internal_name": {
+            "defaultValue": "app_gateway_internal",
+            "type": "String"
+        },
+        "virtualNetworks_vnet_hub_externalid": {
+            "defaultValue": "/subscriptions/08090c4c-f1ab-4fd3-9a9d-f4fda08b6212/resourceGroups/rg_lab/providers/Microsoft.Network/virtualNetworks/vnet-hub",
+            "type": "String"
+        },
+        "publicIPAddresses_appgw_pip_externalid": {
+            "defaultValue": "/subscriptions/08090c4c-f1ab-4fd3-9a9d-f4fda08b6212/resourceGroups/rg_lab/providers/Microsoft.Network/publicIPAddresses/appgw-pip",
+            "type": "String"
+        },
+        "ApplicationGatewayWebApplicationFirewallPolicies_waf_policy_externalid": {
+            "defaultValue": "/subscriptions/08090c4c-f1ab-4fd3-9a9d-f4fda08b6212/resourceGroups/rg_lab/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/waf_policy",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/applicationGateways",
+            "apiVersion": "2025-05-01",
+            "name": "[parameters('applicationGateways_app_gateway_internal_name')]",
+            "location": "centralus",
+            "zones": [
+                "1",
+                "2",
+                "3"
+            ],
+            "properties": {
+                "sku": {
+                    "name": "WAF_v2",
+                    "tier": "WAF_v2",
+                    "family": "Generation_2"
+                },
+                "gatewayIPConfigurations": [
+                    {
+                        "name": "appGatewayIpConfig",
+                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/gatewayIPConfigurations/appGatewayIpConfig')]",
+                        "properties": {
+                            "subnet": {
+                                "id": "[concat(parameters('virtualNetworks_vnet_hub_externalid'), '/subnets/dmz-subnet')]"
+                            }
+                        }
+                    }
+                ],
+                "sslCertificates": [],
+                "trustedRootCertificates": [],
+                "trustedClientCertificates": [],
+                "sslProfiles": [],
+                "frontendIPConfigurations": [
+                    {
+                        "name": "appGwPublicFrontendIpIPv4",
+                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/frontendIPConfigurations/appGwPublicFrontendIpIPv4')]",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[parameters('publicIPAddresses_appgw_pip_externalid')]"
+                            }
+                        }
+                    }
+                ],
+                "frontendPorts": [
+                    {
+                        "name": "port_80",
+                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/frontendPorts/port_80')]",
+                        "properties": {
+                            "port": 80
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "primeserver",
+                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/backendAddressPools/primeserver')]",
+                        "properties": {
+                            "backendAddresses": []
+                        }
+                    },
+                    {
+                        "name": "netflix",
+                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/backendAddressPools/netflix')]",
+                        "properties": {
+                            "backendAddresses": []
+                        }
+                    }
+                ],
+                "loadDistributionPolicies": [],
+                "backendHttpSettingsCollection": [
+                    {
+                        "name": "mybackend",
+                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/backendHttpSettingsCollection/mybackend')]",
+                        "properties": {
+                            "port": 80,
+                            "protocol": "Http",
+                            "cookieBasedAffinity": "Disabled",
+                            "pickHostNameFromBackendAddress": false,
+                            "dedicatedBackendConnection": false,
+                            "validateCertChainAndExpiry": true,
+                            "validateSNI": true,
+                            "requestTimeout": 20
+                        }
+                    }
+                ],
+                "backendSettingsCollection": [],
+                "httpListeners": [
+                    {
+                        "name": "listener-1",
+                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/httpListeners/listener-1')]",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/frontendIPConfigurations/appGwPublicFrontendIpIPv4')]"
+                            },
+                            "frontendPort": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/frontendPorts/port_80')]"
+                            },
+                            "protocol": "Http",
+                            "hostNames": [],
+                            "requireServerNameIndication": false,
+                            "customErrorConfigurations": []
+                        }
+                    }
+                ],
+                "listeners": [],
+                "urlPathMaps": [
+                    {
+                        "name": "routing-rules",
+                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/urlPathMaps/routing-rules')]",
+                        "properties": {
+                            "defaultBackendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/backendAddressPools/primeserver')]"
+                            },
+                            "defaultBackendHttpSettings": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/backendHttpSettingsCollection/mybackend')]"
+                            },
+                            "pathRules": [
+                                {
+                                    "name": "netflixpage",
+                                    "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/urlPathMaps/routing-rules/pathRules/netflixpage')]",
+                                    "properties": {
+                                        "paths": [
+                                            "/netflix/*"
+                                        ],
+                                        "backendAddressPool": {
+                                            "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/backendAddressPools/netflix')]"
+                                        },
+                                        "backendHttpSettings": {
+                                            "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/backendHttpSettingsCollection/mybackend')]"
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "primevideo",
+                                    "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/urlPathMaps/routing-rules/pathRules/primevideo')]",
+                                    "properties": {
+                                        "paths": [
+                                            "/images/*"
+                                        ],
+                                        "backendAddressPool": {
+                                            "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/backendAddressPools/primeserver')]"
+                                        },
+                                        "backendHttpSettings": {
+                                            "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/backendHttpSettingsCollection/mybackend')]"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "requestRoutingRules": [
+                    {
+                        "name": "routing-rules",
+                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/requestRoutingRules/routing-rules')]",
+                        "properties": {
+                            "ruleType": "PathBasedRouting",
+                            "priority": 111,
+                            "httpListener": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/httpListeners/listener-1')]"
+                            },
+                            "urlPathMap": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_app_gateway_internal_name')), '/urlPathMaps/routing-rules')]"
+                            }
+                        }
+                    }
+                ],
+                "routingRules": [],
+                "probes": [],
+                "rewriteRuleSets": [],
+                "redirectConfigurations": [],
+                "privateLinkConfigurations": [],
+                "entraJWTValidationConfigs": [],
+                "enableHttp2": true,
+                "forceFirewallPolicyAssociation": true,
+                "autoscaleConfiguration": {
+                    "minCapacity": 2,
+                    "maxCapacity": 10
+                },
+                "globalConfiguration": {
+                    "enableRequestBuffering": true
+                },
+                "customErrorConfigurations": [],
+                "firewallPolicy": {
+                    "id": "[parameters('ApplicationGatewayWebApplicationFirewallPolicies_waf_policy_externalid')]"
+                }
+            }
+        }
+    ]
+}

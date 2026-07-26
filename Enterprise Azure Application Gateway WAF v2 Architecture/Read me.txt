@@ -1,0 +1,23 @@
+Azure WAF v2 DMZ → WEB Lab
+This project demonstrates a secure DMZ architecture using Azure Application Gateway WAF v2, NSGs, and backend Nginx servers.
+
+Architecture
+DMZ subnet hosts WAF
+
+WEB subnet hosts backend VMs
+
+Path-based routing: /prime and /netflix
+
+Features
+Zero Trust NSG model
+
+No public IPs on VMs
+
+WAF v2 with path routing
+
+Nginx backend servers
+
+Testing
+http://<WAF-IP>/prime
+
+http://<WAF-IP>/netflix
