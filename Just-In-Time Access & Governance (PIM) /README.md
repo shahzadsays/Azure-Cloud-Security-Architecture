@@ -1,4 +1,4 @@
-# Just-In-Time Access & Governance (PIM)[cite: 2]
+# Just-In-Time Access & Governance (PIM)
 
 ## Executive Summary
 * **Scenario:** GlobalCorp's database administrators hold permanent, 24/7 "Global Admin" privileges[cite: 2]. If an admin's laptop is compromised off-hours, the blast radius is catastrophic[cite: 2].
