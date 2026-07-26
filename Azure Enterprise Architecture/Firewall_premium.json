@@ -1,0 +1,59 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "azureFirewalls_afw_hub_premium_prod_01_name": {
+            "defaultValue": "afw-hub-premium-prod-01",
+            "type": "String"
+        },
+        "publicIPAddresses_pip_hub_firewall_prod_01_externalid": {
+            "defaultValue": "/subscriptions/08090c4c-f1ab-4fd3-9a9d-f4fda08b6212/resourceGroups/rg_lab/providers/Microsoft.Network/publicIPAddresses/pip-hub-firewall-prod-01",
+            "type": "String"
+        },
+        "virtualNetworks_hub_vnet_externalid": {
+            "defaultValue": "/subscriptions/08090c4c-f1ab-4fd3-9a9d-f4fda08b6212/resourceGroups/rg_lab/providers/Microsoft.Network/virtualNetworks/hub-vnet",
+            "type": "String"
+        },
+        "firewallPolicies_afwp_hub_core_policy_externalid": {
+            "defaultValue": "/subscriptions/08090c4c-f1ab-4fd3-9a9d-f4fda08b6212/resourceGroups/rg_lab/providers/Microsoft.Network/firewallPolicies/afwp-hub-core-policy",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/azureFirewalls",
+            "apiVersion": "2025-05-01",
+            "name": "[parameters('azureFirewalls_afw_hub_premium_prod_01_name')]",
+            "location": "centralus",
+            "properties": {
+                "sku": {
+                    "name": "AZFW_VNet",
+                    "tier": "Premium"
+                },
+                "threatIntelMode": "Alert",
+                "additionalProperties": {},
+                "ipConfigurations": [
+                    {
+                        "name": "pip-hub-firewall-prod-01",
+                        "id": "[concat(resourceId('Microsoft.Network/azureFirewalls', parameters('azureFirewalls_afw_hub_premium_prod_01_name')), '/azureFirewallIpConfigurations/pip-hub-firewall-prod-01')]",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[parameters('publicIPAddresses_pip_hub_firewall_prod_01_externalid')]"
+                            },
+                            "subnet": {
+                                "id": "[concat(parameters('virtualNetworks_hub_vnet_externalid'), '/subnets/AzureFirewallSubnet')]"
+                            }
+                        }
+                    }
+                ],
+                "networkRuleCollections": [],
+                "applicationRuleCollections": [],
+                "natRuleCollections": [],
+                "firewallPolicy": {
+                    "id": "[parameters('firewallPolicies_afwp_hub_core_policy_externalid')]"
+                }
+            }
+        }
+    ]
+}
